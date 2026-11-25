@@ -15,3 +15,9 @@ target_link_libraries (test_ode PUBLIC nanoblas)
 add_executable (demo_autodiff demos/demo_autodiff.cpp)
 target_link_libraries (demo_autodiff PUBLIC nanoblas)
 
+add_executable (test_order demos/test_order.cpp)
+target_link_libraries (test_order PUBLIC nanoblas)
+
+add_executable (test_stiff demos/test_stiff.cpp)
+target_link_libraries (test_stiff PUBLIC nanoblas)
+
