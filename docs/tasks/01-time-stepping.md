@@ -2,6 +2,12 @@
 
 [Back to the report](https://github.com/JakobMelchard/ASC-ODE_team13/blob/main/REPORT.md) · Sections 14-17
 
+## Summary
+
+- Crank-Nicolson implemented in the function algebra, Newton on the new state each step.
+- Measured orders: explicit Euler 1.00, implicit Euler 1.00, Crank-Nicolson 2.00.
+- Stiff RC circuit: explicit Euler diverges above `2/|lambda|`, implicit Euler and Crank-Nicolson stay stable.
+
 ## Implementation
 
 `CrankNicolson` was added to `src/timestepper.hpp` using the existing function algebra. For one step it solves
