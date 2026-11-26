@@ -9,6 +9,8 @@ if ! command -v devcontainer >/dev/null 2>&1; then
     exit 1
 fi
 
+devcontainer up --workspace-folder "$root" >/dev/null
+
 echo "pre-commit: building and testing in the dev container"
 if ! devcontainer exec --workspace-folder "$root" bash -lc '
     set -e
