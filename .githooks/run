@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+
+mode=${1:-}
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+run_checks() {
+    build=$1
+    cmake -S . -B "$build" -DCMAKE_BUILD_TYPE=Release >/dev/null
+    cmake --build "$build" -j >/dev/null
+    ctest --test-dir "$build" --output-on-failure
+    if [ "$mode" = "pre-push" ]; then
+        if ! command -v jupyter-book >/dev/null 2>&1; then
+            echo "pre-push: jupyter-book not found; install it or use the devcontainer" >&2
+            exit 1
+        fi
+        (cd docs && rm -rf _build && jupyter-book build --html --strict)
+    fi
+}
+
+if [ -n "${REMOTE_CONTAINERS:-}" ] || [ -n "${CODESPACES:-}" ] || [ "${container:-}" = "podman" ] || [ "${container:-}" = "docker" ] || [ -f /.dockerenv ]; then
+    run_checks build/container
+    exit 0
+fi
+
+if command -v devcontainer >/dev/null 2>&1; then
+    if devcontainer up --workspace-folder "$root" >/dev/null; then
+        devcontainer exec --workspace-folder "$root" ./.githooks/run "$mode"
+        exit $?
+    fi
+fi
+
+if command -v cmake >/dev/null 2>&1 && command -v ctest >/dev/null 2>&1; then
+    run_checks build/local
+    exit 0
+fi
+
+echo "pre-commit/pre-push: no usable toolchain. Install the devcontainer CLI or cmake and ctest." >&2
+exit 1

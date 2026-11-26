@@ -1,26 +1,3 @@
 #!/bin/sh
-set -eu
-
-root=$(git rev-parse --show-toplevel)
-cd "$root"
-
-if ! command -v devcontainer >/dev/null 2>&1; then
-    echo "pre-push: devcontainer CLI not found; install it or push with --no-verify" >&2
-    exit 1
-fi
-
-devcontainer up --workspace-folder "$root" >/dev/null
-
-echo "pre-push: building, testing, and building the docs in the dev container"
-if ! devcontainer exec --workspace-folder "$root" bash -lc '
-    set -e
-    cmake -S . -B build/container -DCMAKE_BUILD_TYPE=Release >/dev/null
-    cmake --build build/container -j"$(nproc)" >/dev/null
-    ctest --test-dir build/container --output-on-failure
-    cd docs
-    rm -rf _build
-    jupyter-book build --html --strict
-'; then
-    echo "pre-push: checks failed; push aborted" >&2
-    exit 1
-fi
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$dir/run" pre-push
