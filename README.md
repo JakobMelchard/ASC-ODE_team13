@@ -54,5 +54,6 @@ After cloning, enable the hooks once:
 ./.githooks/setup
 ```
 
-`pre-commit` builds and runs CTest in the dev container; `pre-push` also builds the docs. Both start
-the container with `devcontainer up`.
+`pre-commit` builds and runs CTest; `pre-push` also builds the docs. The hooks run directly inside
+the dev container, start it from the host when the `devcontainer` CLI is available, and fall back to
+the local `cmake`/`ctest` toolchain otherwise.
