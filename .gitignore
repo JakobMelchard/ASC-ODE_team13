@@ -38,4 +38,5 @@ build
 .vscode
 
 docs/_build
-demos/output*.txt
+output_*.csv
+output_*.txt

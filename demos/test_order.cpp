@@ -1,9 +1,12 @@
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <timestepper.hpp>
@@ -43,8 +46,9 @@ double integrate (std::shared_ptr<TimeStepper> stepper, int steps, double tend)
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+  const std::string outpath = argc > 1 ? argv[1] : "output_order.csv";
   const double tend = 1.0;
   const double lambda = -1.0;
   auto rhs = std::make_shared<LinearODE>(lambda);
@@ -56,15 +60,23 @@ int main()
     { "Crank-Nicolson", [rhs] { return std::make_shared<CrankNicolson>(rhs); } }
   };
 
-  std::ofstream csv("output_order.csv");
+  std::ofstream csv(outpath);
+  if (!csv)
+  {
+    std::cerr << "cannot open " << outpath << "\n";
+    return EXIT_FAILURE;
+  }
   csv << "method,steps,tau,error,order\n";
 
   std::cout << std::scientific << std::setprecision(6);
   std::cout << std::left << std::setw(16) << "method"
-            << std::right << std::setw(8) << "steps"
-            << std::setw(14) << "tau"
-            << std::setw(16) << "error"
-            << std::setw(10) << "order" << "\n";
+            << std::right << std::setw(6) << "steps"
+            << "  " << std::setw(12) << "tau"
+            << "  " << std::setw(14) << "error"
+            << "  " << std::setw(12) << "order" << "\n";
+
+  std::map<std::string, double> last_order;
+  std::map<std::string, double> last_error;
 
   for (const auto& [name, make_stepper] : methods)
   {
@@ -77,13 +89,39 @@ int main()
       double order = prev_error > 0 ? std::log2(prev_error / error) : 0.0;
 
       std::cout << std::left << std::setw(16) << name
-                << std::right << std::setw(8) << steps
-                << std::setw(14) << tau
-                << std::setw(16) << error
-                << std::setw(10) << order << "\n";
+                << std::right << std::setw(6) << steps
+                << "  " << std::setw(12) << tau
+                << "  " << std::setw(14) << error
+                << "  " << std::setw(12) << order << "\n";
 
       csv << name << ',' << steps << ',' << tau << ',' << error << ',' << order << '\n';
       prev_error = error;
+      last_order[name] = order;
+      last_error[name] = error;
     }
   }
+
+  bool ok = true;
+  auto check = [&ok](bool condition, const std::string& message)
+  {
+    if (!condition)
+    {
+      std::cerr << "FAIL: " << message << "\n";
+      ok = false;
+    }
+  };
+
+  check(last_order["explicit Euler"] > 0.9 && last_order["explicit Euler"] < 1.1,
+        "explicit Euler order should be about 1");
+  check(last_order["implicit Euler"] > 0.9 && last_order["implicit Euler"] < 1.1,
+        "implicit Euler order should be about 1");
+  check(last_order["Crank-Nicolson"] > 1.9 && last_order["Crank-Nicolson"] < 2.1,
+        "Crank-Nicolson order should be about 2");
+  check(last_error["explicit Euler"] < 5e-3, "explicit Euler final error too large");
+  check(last_error["implicit Euler"] < 5e-3, "implicit Euler final error too large");
+  check(last_error["Crank-Nicolson"] < 1e-5, "Crank-Nicolson final error too large");
+
+  if (!ok) return EXIT_FAILURE;
+  std::cout << "PASS: convergence orders and final errors within tolerance\n";
+  return EXIT_SUCCESS;
 }

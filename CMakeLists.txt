@@ -3,6 +3,7 @@ project(ASC_ode)
 
 set (CMAKE_CXX_STANDARD 20)
 
+include(CTest)
 
 include_directories(src nanoblas/src)
 
@@ -20,4 +21,11 @@ target_link_libraries (test_order PUBLIC nanoblas)
 
 add_executable (test_stiff demos/test_stiff.cpp)
 target_link_libraries (test_stiff PUBLIC nanoblas)
+
+if (BUILD_TESTING)
+  add_test (NAME test_order COMMAND test_order)
+  add_test (NAME test_stiff COMMAND test_stiff)
+  set_tests_properties (test_order test_stiff
+    PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
 

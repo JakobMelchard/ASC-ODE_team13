@@ -57,7 +57,7 @@ with `R = 100`, `C = 1e-6`, so `lambda = -1/(RC) = -1e4`. The time is appended a
 
 ![Stiff RC circuit](../pictures/stiff.png)
 
-Explicit Euler is unstable because `|1 + tau lambda| = 1.5 > 1`. The implicit methods remain stable and produce the correct solution. Crank-Nicolson shows a small undershoot during the initial fast transient, which is the expected consequence of A-stability without L-stability: `g(z) -> -1` for `|z| -> infinity`. Implicit Euler damps that mode because `g(z) -> 0`.
+Explicit Euler is unstable because `|1 + tau lambda| = 1.5 > 1`. The implicit methods remain stable and produce the correct solution. At the first step Crank-Nicolson overshoots the exact value (`1.1094` vs `0.9164`, error `+0.193`), while implicit Euler undershoots (`0.7121`, error `-0.204`). This is the expected consequence of A-stability without L-stability: for Crank-Nicolson `g(z) -> -1` as `|z| -> infinity`, so the fast mode is not damped; implicit Euler has `g(z) -> 0` and damps it.
 
 ## Reproduce
 
@@ -70,4 +70,4 @@ python3 scripts/plot_order.py
 python3 scripts/plot_stiff.py
 ```
 
-The scripts read the CSV files written by the demos and regenerate both figures.
+The scripts read `output_order.csv` and `output_stiff.csv` from the repository root, where the demos write them, and regenerate both figures.

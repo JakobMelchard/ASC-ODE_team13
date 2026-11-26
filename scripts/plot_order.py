@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 base = Path(__file__).resolve().parent.parent
 rows = defaultdict(list)
-with open(base / "build" / "output_order.csv") as f:
+with open(base / "output_order.csv") as f:
     for row in csv.DictReader(f):
         rows[row["method"]].append((float(row["tau"]), float(row["error"])))
 
@@ -22,12 +22,14 @@ for method, data in rows.items():
 
 tau_max = max(tau for data in rows.values() for tau, _ in data)
 tau_min = min(tau for data in rows.values() for tau, _ in data)
-
 ref = [tau_min, tau_max]
-ee = sorted(rows["explicit Euler"])[-1]
-cn = sorted(rows["Crank-Nicolson"])[-1]
-ax.loglog(ref, [ee[1] * t / ee[0] for t in ref], "k--", lw=0.8, label=r"$O(\tau)$")
-ax.loglog(ref, [cn[1] * (t / cn[0]) ** 2 for t in ref], "k:", lw=0.8, label=r"$O(\tau^2)$")
+
+ee = sorted(rows.get("explicit Euler", []))
+cn = sorted(rows.get("Crank-Nicolson", []))
+if ee:
+    ax.loglog(ref, [ee[-1][1] * t / ee[-1][0] for t in ref], "k--", lw=0.8, label=r"$O(\tau)$")
+if cn:
+    ax.loglog(ref, [cn[-1][1] * (t / cn[-1][0]) ** 2 for t in ref], "k:", lw=0.8, label=r"$O(\tau^2)$")
 
 ax.set_xlabel(r"time-step $\tau$")
 ax.set_ylabel("error at $t=1$")
