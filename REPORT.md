@@ -8,13 +8,6 @@ TU Wien 360.242, winter semester 2026/2027
 |---|---|---|---|
 | [01](docs/tasks/01-time-stepping.md) | Time stepping: Euler and Crank-Nicolson | 14-17 | done |
 
-## Summary
-
-- Crank-Nicolson implemented in the function algebra, Newton on the new state each step.
-- Measured orders: explicit Euler 1.00, implicit Euler 1.00, Crank-Nicolson 2.00.
-- Stiff RC circuit: explicit Euler diverges above `2/|lambda|`, implicit Euler and Crank-Nicolson stay stable.
-- Devcontainer reproduces the build and CTest suite in a scoped Linux environment.
-
 ## Build
 
 ```sh
