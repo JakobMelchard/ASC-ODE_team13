@@ -1,6 +1,6 @@
 # 01: Time Stepping
 
-[Back to the report](../../REPORT.md) · Sections 14-17
+[Back to the report](https://github.com/JakobMelchard/ASC-ODE_team13/blob/main/REPORT.md) · Sections 14-17
 
 ## Implementation
 
@@ -34,7 +34,7 @@ Test problem: `y' = -y`, `y(0) = 1`, exact `y(1) = e^{-1}`. The error at `t = 1`
 | Implicit Euler | 1.00 | `1.147e-3` |
 | Crank-Nicolson | 2.00 | `1.198e-6` |
 
-![Convergence orders](../../plots/order.png)
+![Convergence orders](../pictures/order.png)
 
 The measured orders match the theory: both Euler methods are first order, Crank-Nicolson is second order. The reference lines in the plot use the measured error of the coarsest step of each method.
 
@@ -55,13 +55,13 @@ with `R = 100`, `C = 1e-6`, so `lambda = -1/(RC) = -1e4`. The time is appended a
 | Crank-Nicolson | `0.99901` | `< 1e-5` |
 | Exact | `0.99901` | |
 
-![Stiff RC circuit](../../plots/stiff.png)
+![Stiff RC circuit](../pictures/stiff.png)
 
 Explicit Euler is unstable because `|1 + tau lambda| = 1.5 > 1`. The implicit methods remain stable and produce the correct solution. Crank-Nicolson shows a small undershoot during the initial fast transient, which is the expected consequence of A-stability without L-stability: `g(z) -> -1` for `|z| -> infinity`. Implicit Euler damps that mode because `g(z) -> 0`.
 
 ## Reproduce
 
-After the build in [the report](../../REPORT.md):
+After the build described in the repository README:
 
 ```sh
 ./build/test_order

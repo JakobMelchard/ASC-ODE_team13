@@ -36,7 +36,7 @@ ax.grid(True, which="both", alpha=0.3)
 ax.legend()
 fig.tight_layout()
 
-out = base / "plots" / "order.png"
+out = base / "docs" / "pictures" / "order.png"
 out.parent.mkdir(exist_ok=True)
 fig.savefig(out, dpi=150)
 print(out)
