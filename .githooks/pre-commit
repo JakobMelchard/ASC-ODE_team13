@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+if ! command -v devcontainer >/dev/null 2>&1; then
+    echo "pre-commit: devcontainer CLI not found; install it or commit with --no-verify" >&2
+    exit 1
+fi
+
+echo "pre-commit: building and testing in the dev container"
+if ! devcontainer exec --workspace-folder "$root" bash -lc '
+    set -e
+    cmake -S . -B build/container -DCMAKE_BUILD_TYPE=Release >/dev/null
+    cmake --build build/container -j"$(nproc)" >/dev/null
+    ctest --test-dir build/container --output-on-failure
+'; then
+    echo "pre-commit: build or tests failed; commit aborted" >&2
+    exit 1
+fi
