@@ -1,6 +1,0 @@
-# Activate with: git config --local include.path ../.gitconfig
-[core]
-    hooksPath = .githooks
-[user]
-    name = Jakob Melchard
-    email = 193064191+lilfeelz@users.noreply.github.com

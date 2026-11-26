@@ -45,3 +45,14 @@ jupyter-book start
 On every push to `main`, the GitHub workflow `.github/workflows/docs.yml` builds it and publishes
 it on GitHub Pages. Once per repository, set Settings -> Pages -> Source to "GitHub Actions";
 in a fork, also enable workflows in the Actions tab.
+
+## Development
+
+After cloning, enable the hooks once:
+
+```sh
+./.githooks/setup
+```
+
+`pre-commit` builds and runs CTest in the dev container; `pre-push` also builds the docs. Both start
+the container with `devcontainer up`.
