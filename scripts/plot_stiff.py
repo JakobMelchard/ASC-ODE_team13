@@ -11,17 +11,17 @@ import matplotlib.pyplot as plt
 
 base = Path(__file__).resolve().parent.parent
 series = defaultdict(lambda: {"t": [], "U": []})
-exact = {"t": [], "U": []}
-with open(base / "build" / "output_stiff.csv") as f:
+exact = {}
+with open(base / "output_stiff.csv") as f:
     for row in csv.DictReader(f):
         s = series[row["method"]]
         s["t"].append(float(row["t"]))
         s["U"].append(float(row["U"]))
-        exact["t"].append(float(row["t"]))
-        exact["U"].append(float(row["exact"]))
+        exact[float(row["t"])] = float(row["exact"])
 
 fig, ax = plt.subplots(figsize=(7, 4.5))
-ax.plot(exact["t"], exact["U"], "k--", lw=1.2, label="exact")
+exact_t = sorted(exact)
+ax.plot(exact_t, [exact[t] for t in exact_t], "k--", lw=1.2, label="exact")
 for method, s in series.items():
     ax.plot(s["t"], s["U"], lw=1.2, label=method)
 

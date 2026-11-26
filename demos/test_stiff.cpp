@@ -1,10 +1,13 @@
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <numbers>
+#include <string>
 #include <vector>
 
 #include <timestepper.hpp>
@@ -48,8 +51,9 @@ double exact (double t, double a, double omega)
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+  const std::string outpath = argc > 1 ? argv[1] : "output_stiff.csv";
   const double R = 100.0;
   const double C = 1e-6;
   const double a = -1.0 / (R * C);
@@ -60,13 +64,19 @@ int main()
 
   auto rhs = std::make_shared<RC_Circuit>(R * C, omega);
 
-  std::ofstream csv("output_stiff.csv");
+  std::ofstream csv(outpath);
+  if (!csv)
+  {
+    std::cerr << "cannot open " << outpath << "\n";
+    return EXIT_FAILURE;
+  }
   csv << "method,t,U,exact\n";
 
   std::cout << std::scientific << std::setprecision(4);
   std::cout << "tau = " << tau << ", explicit Euler stability limit = " << 2.0 / std::abs(a) << "\n";
-  std::cout << std::left << std::setw(16) << "method" << std::right << std::setw(16) << "U(T)"
-            << std::setw(16) << "exact(T)" << "\n";
+  std::cout << std::left << std::setw(16) << "method"
+            << std::right << std::setw(14) << "U(T)"
+            << "  " << std::setw(14) << "exact(T)" << "\n";
 
   using factory_t = std::function<std::shared_ptr<TimeStepper>()>;
   std::vector<std::pair<std::string, factory_t>> methods = {
@@ -74,6 +84,9 @@ int main()
     { "implicit Euler", [rhs] { return std::make_shared<ImplicitEuler>(rhs); } },
     { "Crank-Nicolson", [rhs] { return std::make_shared<CrankNicolson>(rhs); } }
   };
+
+  std::map<std::string, double> final;
+  const double uexact = exact(tend, a, omega);
 
   for (const auto& [name, make_stepper] : methods)
   {
@@ -87,7 +100,32 @@ int main()
       csv << name << ',' << y(1) << ',' << y(0) << ',' << exact(y(1), a, omega) << '\n';
     }
 
-    std::cout << std::left << std::setw(16) << name << std::right << std::setw(16) << y(0)
-              << std::setw(16) << exact(tend, a, omega) << "\n";
+    final[name] = y(0);
+    std::cout << std::left << std::setw(16) << name
+              << std::right << std::setw(14) << y(0)
+              << "  " << std::setw(14) << uexact << "\n";
   }
+
+  bool ok = true;
+  auto check = [&ok](bool condition, const std::string& message)
+  {
+    if (!condition)
+    {
+      std::cerr << "FAIL: " << message << "\n";
+      ok = false;
+    }
+  };
+
+  check(std::abs(final["explicit Euler"]) > 1e6,
+        "explicit Euler should diverge above the stability limit");
+  check(std::abs(final["implicit Euler"] - uexact) < 5e-3,
+        "implicit Euler should stay near the exact value");
+  check(std::abs(final["Crank-Nicolson"] - uexact) < 1e-4,
+        "Crank-Nicolson should stay near the exact value");
+  check(std::abs(final["Crank-Nicolson"]) < 2.0,
+        "Crank-Nicolson should remain stable");
+
+  if (!ok) return EXIT_FAILURE;
+  std::cout << "PASS: stiff problem diverges for explicit Euler and stays stable for implicit methods\n";
+  return EXIT_SUCCESS;
 }
