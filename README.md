@@ -1,10 +1,18 @@
 # ASC-ODE
 
-A package for solving ordinary differential equations.
+A C++20 library for solving ordinary differential equations with time-stepping methods.
 
 - Documentation: https://docs.melchard.org/ASC-ODE_team13/
 - Course report: [REPORT.md](REPORT.md)
 - Theory: https://jschoeberl.github.io/IntroSC/ODEs/ODEs.html
+
+## Requirements
+
+- CMake 3.20 or newer
+- A C++20 compiler
+- Python 3 with pybind11, for the `nanoblas` submodule
+- Optional: `matplotlib`, for the plotting scripts
+- Optional: the `devcontainer` CLI with Docker or Podman
 
 ## Build
 
@@ -15,7 +23,16 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
-Run the demos from the repository root, where they write their CSV output:
+The dev container builds the same targets into `build/container`:
+
+```sh
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash -lc 'ctest --test-dir build/container --output-on-failure'
+```
+
+## Run
+
+Run the demos from the repository root. They write `output_*.csv` there:
 
 ```sh
 ./build/test_order
@@ -24,17 +41,9 @@ python3 scripts/plot_order.py
 python3 scripts/plot_stiff.py
 ```
 
-The dev container provides the same toolchain and builds into `build/container`:
-
-```sh
-devcontainer up --workspace-folder .
-devcontainer exec --workspace-folder . bash -lc 'ctest --test-dir build/container --output-on-failure'
-```
-
 ## Documentation
 
-The documentation in `docs/` is a [Jupyter Book](https://jupyterbook.org) (version 2).
-To preview it locally:
+The documentation in `docs/` is a Jupyter Book 2. Preview it locally:
 
 ```sh
 npm install -g jupyter-book
@@ -42,11 +51,12 @@ cd docs
 jupyter-book start
 ```
 
-On every push to `main`, the GitHub workflow `.github/workflows/docs.yml` builds it and publishes
-it on GitHub Pages. Once per repository, set Settings -> Pages -> Source to "GitHub Actions";
-in a fork, also enable workflows in the Actions tab.
+Pushes to `main` build and publish it with `.github/workflows/docs.yml`.
 
-## Git hooks
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, hooks, CI, and pull request
+rules.
 
 Enable the hooks once per clone:
 
@@ -54,28 +64,17 @@ Enable the hooks once per clone:
 ./.githooks/setup
 ```
 
-Git does not activate repository hooks automatically, so this step is required after cloning.
-`pre-commit` configures and builds, then runs CTest. `pre-push` does the same and builds the
-documentation. The shared implementation is `.githooks/run`; `pre-commit` and `pre-push` only call
-it.
+A mounted dev container shares `.git/config`, so setup on the host is enough. Run it again only for
+a separate clone created inside the container.
 
-The hooks choose the environment automatically:
+## Layout
 
-- Inside the dev container (`REMOTE_CONTAINERS`, `CODESPACES`, `container=podman|docker`, or
-  `/.dockerenv`), they run the tools directly.
-- On a host with the `devcontainer` CLI and Docker or Podman, they call `devcontainer up` and run
-  inside the container.
-- Otherwise they fall back to local `cmake`/`ctest`; `pre-push` then also needs `jupyter-book`.
-- If no usable toolchain exists, the hook fails with a message.
+- `src/`: library sources and time-steppers
+- `demos/`: convergence and stiff-problem demos
+- `scripts/`: plotting scripts
+- `docs/`: Jupyter Book documentation and task reports
+- `.githooks/`: local hooks
 
-Container builds use `build/container`; the local fallback uses `build/local`. The dev container
-includes cmake, ctest, Python/pybind11, Node, and Jupyter Book.
+## License
 
-Run a hook manually with:
-
-```sh
-./.githooks/run pre-commit
-./.githooks/run pre-push
-```
-
-Use `--no-verify` only when you intentionally bypass the gate.
+MIT, see [LICENSE](LICENSE).
