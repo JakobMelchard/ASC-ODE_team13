@@ -4,8 +4,11 @@ project:
   title: ASC-ODE
   description: A C++ library for solving ordinary differential equations
   authors:
-    - name: Your Name            # put your names here
-  github: https://github.com/TUWien-ASC/ASC-ODE   # change to your fork
+    - name: Mohab Osama Hassan Hassanin Eldemery
+    - name: Adam Kinman
+    - name: Jakob Melchard
+    - name: Harish Sudhakaran
+  github: https://github.com/JakobMelchard/ASC-ODE_team13
   toc:
     - file: intro.md
     # add more pages of your user manual here, e.g.
