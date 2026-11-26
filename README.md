@@ -46,15 +46,36 @@ On every push to `main`, the GitHub workflow `.github/workflows/docs.yml` builds
 it on GitHub Pages. Once per repository, set Settings -> Pages -> Source to "GitHub Actions";
 in a fork, also enable workflows in the Actions tab.
 
-## Development
+## Git hooks
 
-After cloning, enable the hooks once:
+Enable the hooks once per clone:
 
 ```sh
 ./.githooks/setup
 ```
 
-`pre-commit` builds and runs CTest; `pre-push` also builds the docs. The hooks run directly inside
-the dev container, start it from the host when the `devcontainer` CLI is available, and fall back to
-the local `cmake`/`ctest` toolchain otherwise. The local `pre-push` fallback also needs
-`jupyter-book`.
+Git does not activate repository hooks automatically, so this step is required after cloning.
+`pre-commit` configures and builds, then runs CTest. `pre-push` does the same and builds the
+documentation. The shared implementation is `.githooks/run`; `pre-commit` and `pre-push` only call
+it.
+
+The hooks choose the environment automatically:
+
+- Inside the dev container (`REMOTE_CONTAINERS`, `CODESPACES`, `container=podman|docker`, or
+  `/.dockerenv`), they run the tools directly.
+- On a host with the `devcontainer` CLI and Docker or Podman, they call `devcontainer up` and run
+  inside the container.
+- Otherwise they fall back to local `cmake`/`ctest`; `pre-push` then also needs `jupyter-book`.
+- If no usable toolchain exists, the hook fails with a message.
+
+Container builds use `build/container`; the local fallback uses `build/local`. The dev container
+includes cmake, ctest, Python/pybind11, Node, and Jupyter Book.
+
+Run a hook manually with:
+
+```sh
+./.githooks/run pre-commit
+./.githooks/run pre-push
+```
+
+Use `--no-verify` only when you intentionally bypass the gate.
