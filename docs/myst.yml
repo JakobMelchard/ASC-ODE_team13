@@ -11,8 +11,7 @@ project:
   github: https://github.com/JakobMelchard/ASC-ODE_team13
   toc:
     - file: intro.md
-    # add more pages of your user manual here, e.g.
-    # - file: timesteppers.md
+    - pattern: 'tasks/*.md'
 
 site:
   template: book-theme

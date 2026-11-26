@@ -35,5 +35,5 @@ devcontainer exec --workspace-folder . bash -lc './build/container/test_ode'
 - `src/`: library sources, including the time-steppers
 - `demos/`: convergence and stiff-problem demos
 - `scripts/`: plotting scripts
-- `plots/`: generated figures
+- `docs/pictures/`: generated figures
 - `docs/tasks/`: one report per component

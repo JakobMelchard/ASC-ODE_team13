@@ -33,7 +33,7 @@ ax.grid(True, which="both", alpha=0.3)
 ax.legend(loc="lower left")
 fig.tight_layout()
 
-out = base / "plots" / "stiff.png"
+out = base / "docs" / "pictures" / "stiff.png"
 out.parent.mkdir(exist_ok=True)
 fig.savefig(out, dpi=150)
 print(out)
